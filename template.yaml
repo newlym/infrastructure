@@ -8,7 +8,7 @@ Resources:
             CodeUri: checkout/
             Handler: app.lambdaHandler
             Runtime: nodejs16.x
-            Policies: AWSLambdaDynamoDBExecutionRole
+            Policies: AmazonDynamoDBFullAccess
             Architectures:
                 - x86_64
             Events:
