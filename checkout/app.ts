@@ -12,16 +12,21 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
     const dynamo = new DynamoDB.DocumentClient();
 
     const response = await dynamo.get({ Key: { checkoutId }, TableName: TABLE_NAME }).promise();
-    // const checkoutConfig = JSON.parse(response.Item);
-    // const checkout = await stripe.checkout.sessions.create(checkoutConfig);
 
-    console.log(response);
+    const checkoutConfig = JSON.parse(response.Item?.value);
+    const checkout = await stripe.checkout.sessions.create(checkoutConfig);
+
+    if (!checkout.url)
+        return {
+            statusCode: 500,
+            body: "Error",
+        };
 
     return {
         statusCode: 302,
         headers: {
-            Location: "",
+            Location: checkout.url,
         },
-        body: "",
+        body: checkout.url,
     };
 };
