@@ -2,7 +2,8 @@
     "name": "hello_world",
     "version": "1.0.0",
     "dependencies": {
-        "aws-sdk": "^2.1181.0"
+        "aws-sdk": "^2.1181.0",
+        "stripe": "^9.14.0"
     },
     "scripts": {
         "compile": "tsc"
