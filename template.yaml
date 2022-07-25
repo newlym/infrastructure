@@ -59,9 +59,9 @@ Resources:
                       Id: ResizeApi
                       OriginPath: /Prod/resize
                       CustomOriginConfig:
-                      HTTPPort: 80
-                      HTTPSPort: 443
-                      OriginProtocolPolicy: http-only
+                          HTTPPort: 80
+                          HTTPSPort: 443
+                          OriginProtocolPolicy: http-only
                 Enabled: true
                 DefaultCacheBehavior:
                     TargetOriginId: ResizeApi
