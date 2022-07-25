@@ -63,6 +63,11 @@ Resources:
         Type: AWS::CloudFront::OriginRequestPolicy
         Properties:
             OriginRequestPolicyConfig:
+                Name: ResizeCloudFrontOriginPolicy
+                HeadersConfig:
+                    HeaderBehavior: none
+                CookiesConfig:
+                    CookieBehavior: none
                 QueryStringsConfig:
                     QueryStringBehavior: whitelist
                     QueryStrings:
@@ -71,6 +76,10 @@ Resources:
         Type: AWS::CloudFront::CachePolicy
         Properties:
             CachePolicyConfig:
+                Name: ResizeCloudFrontCachePolicy
+                MinTTL: 1
+                MaxTTL: 31536000
+                DefaultTTL: 86400
                 ParametersInCacheKeyAndForwardedToOrigin:
                     QueryStringsConfig:
                         QueryStringBehavior: whitelist
