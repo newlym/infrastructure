@@ -33,6 +33,16 @@ Resources:
                 Sourcemap: true
                 EntryPoints:
                     - app.ts
+    ResizeFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            PackageType: Image
+            Architectures:
+                - x86_64
+        Metadata:
+            DockerTag: nodejs16.x-v1
+            DockerContext: resize/
+            Dockerfile: Dockerfile
     CheckoutConfigTable:
         Type: "AWS::DynamoDB::Table"
         Properties:

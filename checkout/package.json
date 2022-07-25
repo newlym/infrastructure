@@ -1,5 +1,5 @@
 {
-    "name": "hello_world",
+    "name": "checkout",
     "version": "1.0.0",
     "dependencies": {
         "aws-sdk": "^2.1181.0",
