@@ -37,6 +37,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             PackageType: Image
+            Policies: AmazonS3FullAccess
             Architectures:
                 - x86_64
             Events:
