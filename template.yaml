@@ -39,6 +39,12 @@ Resources:
             PackageType: Image
             Architectures:
                 - x86_64
+            Events:
+                ResizeImageAPI:
+                    Type: Api
+                    Properties:
+                        Path: /resize/{image}
+                        Method: GET
         Metadata:
             DockerTag: nodejs16.x-v1
             DockerContext: resize/

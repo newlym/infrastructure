@@ -8,4 +8,4 @@ s3_prefix = "newlym"
 region = "ap-southeast-2"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-image_repositories = []
+image_repositories = ["ResizeFunction=641490273710.dkr.ecr.ap-southeast-2.amazonaws.com/newlym49cf979c/resizefunction5d217ffcrepo"]
