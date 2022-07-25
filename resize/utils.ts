@@ -2,13 +2,18 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import S3 from "aws-sdk/clients/s3";
 import sharp from "sharp";
 
-export function getExtension(fileName: string) {
+function getExtension(fileName: string) {
     const split = fileName.split(".");
     return split[split.length - 1];
 }
 
 export async function handleExisting(fileName: string, bucket: string, s3: S3): Promise<APIGatewayProxyResult> {
+    console.log("Handle existing");
+    console.log("Params", fileName, bucket);
+
     const fileExtension = getExtension(fileName);
+
+    console.log(fileExtension);
 
     const uploaded = await s3.getObject({ Bucket: bucket, Key: fileName }).promise();
 
