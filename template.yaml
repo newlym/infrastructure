@@ -54,9 +54,13 @@ Resources:
         Type: AWS::CloudFront::Distribution
         Properties:
             DistributionConfig:
+                Enabled: true
                 Origins:
-                    - DomainName: https://siav2s6634.execute-api.ap-southeast-2.amazonaws.com
+                    - DomainName: siav2s6634.execute-api.ap-southeast-2.amazonaws.com
+                      Id: ResizeApi
                 DefaultCacheBehavior:
+                    TargetOriginId: ResizeApi
+                    ViewerProtocolPolicy: allow-all
                     OriginRequestPolicyId: !Ref ResizeCloudFrontOriginPolicy
                     CachePolicyId: !Ref ResizeCloudFrontCachePolicy
     ResizeCloudFrontOriginPolicy:
@@ -81,6 +85,12 @@ Resources:
                 MaxTTL: 31536000
                 DefaultTTL: 86400
                 ParametersInCacheKeyAndForwardedToOrigin:
+                    HeadersConfig:
+                        HeaderBehavior: none
+                    CookiesConfig:
+                        CookieBehavior: none
+                    EnableAcceptEncodingBrotli: true
+                    EnableAcceptEncodingGzip: true
                     QueryStringsConfig:
                         QueryStringBehavior: whitelist
                         QueryStrings:
