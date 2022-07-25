@@ -3,6 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 
 Parameters:
     DBUsername:
+        NoEcho: true
         Type: String
     DBPassword:
         NoEcho: true
@@ -49,6 +50,7 @@ Resources:
             DBInstanceIdentifier: CMS
             DBName: strapi
             DBInstanceClass: db.t3.micro
+            AllocatedStorage: 100
             Engine: postgres
             EngineVersion: 10.20-R1
             MasterUsername: !Ref DBUsername
