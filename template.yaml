@@ -127,6 +127,9 @@ Resources:
     RawImageBucket:
         Type: AWS::S3::Bucket
         Properties:
+            OwnershipControls:
+                Rules:
+                    - ObjectOwnership: BucketOwnerPreferred
             PublicAccessBlockConfiguration:
                 BlockPublicAcls: true
                 BlockPublicPolicy: true
@@ -135,6 +138,9 @@ Resources:
     ResizedImageBucket:
         Type: AWS::S3::Bucket
         Properties:
+            OwnershipControls:
+                Rules:
+                    - ObjectOwnership: BucketOwnerPreferred
             PublicAccessBlockConfiguration:
                 BlockPublicAcls: true
                 BlockPublicPolicy: true
