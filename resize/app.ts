@@ -9,12 +9,8 @@ const RAW_IMAGE_BUCKET = process.env.RAW_IMAGE_BUCKET as string;
 const RESIZED_IMAGE_BUCKET = process.env.RESIZED_BUCKET as string;
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-    console.log(RAW_IMAGE_BUCKET, RESIZED_IMAGE_BUCKET);
-
     const fileName = event.pathParameters?.file;
     const size = event.queryStringParameters?.size;
-
-    console.log(fileName, size);
 
     if (!fileName) throw Error("No file name provided");
     if (!size) return await handleExisting(fileName, RAW_IMAGE_BUCKET, s3);

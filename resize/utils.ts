@@ -8,12 +8,7 @@ function getExtension(fileName: string) {
 }
 
 export async function handleExisting(fileName: string, bucket: string, s3: S3): Promise<APIGatewayProxyResult> {
-    console.log("Handle existing");
-    console.log("Params", fileName, bucket);
-
     const fileExtension = getExtension(fileName);
-
-    console.log(fileExtension);
 
     const uploaded = await s3.getObject({ Bucket: bucket, Key: fileName }).promise();
 
