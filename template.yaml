@@ -44,7 +44,7 @@ Resources:
                 ResizeImageAPI:
                     Type: Api
                     Properties:
-                        Path: /resize/{image}
+                        Path: /resize/{file}
                         Method: GET
         Metadata:
             DockerTag: nodejs16.x-v1
@@ -61,7 +61,9 @@ Resources:
                       CustomOriginConfig:
                           HTTPPort: 80
                           HTTPSPort: 443
-                          OriginProtocolPolicy: http-only
+                          OriginProtocolPolicy: https-only
+                          OriginSSLProtocols:
+                              - TLSv1.2
                 Enabled: true
                 DefaultCacheBehavior:
                     TargetOriginId: ResizeApi
