@@ -50,6 +50,32 @@ Resources:
             DockerTag: nodejs16.x-v1
             DockerContext: resize/
             Dockerfile: Dockerfile
+    ResizeCloudFront:
+        Type: AWS::CloudFront::Distribution
+        Properties:
+            DistributionConfig:
+                Origins:
+                    - DomainName: https://siav2s6634.execute-api.ap-southeast-2.amazonaws.com
+                DefaultCacheBehavior:
+                    OriginRequestPolicyId: !Ref ResizeCloudFrontOriginPolicy
+                    CachePolicyId: !Ref ResizeCloudFrontCachePolicy
+    ResizeCloudFrontOriginPolicy:
+        Type: AWS::CloudFront::OriginRequestPolicy
+        Properties:
+            OriginRequestPolicyConfig:
+                QueryStringsConfig:
+                    QueryStringBehavior: whitelist
+                    QueryStrings:
+                        - size
+    ResizeCloudFrontCachePolicy:
+        Type: AWS::CloudFront::CachePolicy
+        Properties:
+            CachePolicyConfig:
+                ParametersInCacheKeyAndForwardedToOrigin:
+                    QueryStringsConfig:
+                        QueryStringBehavior: whitelist
+                        QueryStrings:
+                            - size
     CheckoutConfigTable:
         Type: "AWS::DynamoDB::Table"
         Properties:
