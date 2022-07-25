@@ -54,10 +54,15 @@ Resources:
         Type: AWS::CloudFront::Distribution
         Properties:
             DistributionConfig:
-                Enabled: true
                 Origins:
                     - DomainName: siav2s6634.execute-api.ap-southeast-2.amazonaws.com
                       Id: ResizeApi
+                      OriginPath: /Prod/resize
+                      CustomOriginConfig:
+                      HTTPPort: 80
+                      HTTPSPort: 443
+                      OriginProtocolPolicy: http-only
+                Enabled: true
                 DefaultCacheBehavior:
                     TargetOriginId: ResizeApi
                     ViewerProtocolPolicy: allow-all
