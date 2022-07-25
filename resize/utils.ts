@@ -27,7 +27,6 @@ export async function handleResize(fileName: string, key: string, dimensions: { 
 
     const image = await sharp(uploaded.Body as Buffer)
         .resize(dimensions.width, dimensions.height)
-        .toFormat(fileExtension as any)
         .toBuffer();
 
     await s3.upload({ Body: image, Bucket: resizedBucket, Key: key }).promise();
