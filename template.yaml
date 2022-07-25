@@ -55,3 +55,7 @@ Resources:
             MasterUsername: !Ref DBUsername
             MasterUserPassword: !Ref DBPassword
             PubliclyAccessible: true
+    RawImageBucket:
+        Type: AWS::S3::Bucket
+    ResizedImageBucket:
+        Type: AWS::S3::Bucket
