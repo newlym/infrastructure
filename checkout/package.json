@@ -2,7 +2,7 @@
     "name": "checkout",
     "version": "1.0.0",
     "dependencies": {
-        "aws-sdk": "^2.1181.0",
+        "axios": "^0.27.2",
         "stripe": "^9.14.0"
     },
     "scripts": {
