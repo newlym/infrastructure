@@ -5,7 +5,6 @@ import axios from "axios";
 const STRIPE_KEY = process.env.STRIPE_KEY as string;
 const API_URL = process.env.API_URL as string;
 const API_TOKEN = process.env.API_TOKEN as string;
-
 const SUCCESS_URL = process.env.SUCCESS_URL as string;
 const CANCEL_URL = process.env.CANCEL_URL as string;
 
