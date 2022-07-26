@@ -10,6 +10,7 @@ Parameters:
         Type: String
 
 Resources:
+    # ==== API Gateway ====
     APIGatewayAPI:
         Type: AWS::Serverless::Api
         Properties:
@@ -40,11 +41,16 @@ Resources:
                 Sourcemap: true
                 EntryPoints:
                     - app.ts
+    # ==== Lambda ====
     ResizeFunction:
         Type: AWS::Serverless::Function
         Properties:
             PackageType: Image
             Policies: AmazonS3FullAccess
+            Environment:
+                Variables:
+                    RAW_IMAGE_BUCKET: !Ref RawImageBucket
+                    RESIZED_BUCKET: !Ref ResizedImageBucket
             Architectures:
                 - x86_64
             Events:
@@ -58,6 +64,7 @@ Resources:
             DockerTag: nodejs16.x-v1
             DockerContext: resize/
             Dockerfile: Dockerfile
+    # ==== CloudFront ====
     ResizeCloudFront:
         Type: AWS::CloudFront::Distribution
         Properties:
@@ -110,17 +117,7 @@ Resources:
                         QueryStringBehavior: whitelist
                         QueryStrings:
                             - size
-    CheckoutConfigTable:
-        Type: "AWS::DynamoDB::Table"
-        Properties:
-            TableName: CheckoutConfig
-            AttributeDefinitions:
-                - AttributeName: checkoutId
-                  AttributeType: S
-            KeySchema:
-                - AttributeName: checkoutId
-                  KeyType: HASH
-            BillingMode: PAY_PER_REQUEST
+    # ==== RDS ====
     CMSDatabase:
         Type: "AWS::RDS::DBInstance"
         Properties:
@@ -132,6 +129,7 @@ Resources:
             MasterUsername: !Ref DBUsername
             MasterUserPassword: !Ref DBPassword
             PubliclyAccessible: true
+    # ==== S3 ====
     RawImageBucket:
         Type: AWS::S3::Bucket
         Properties:
@@ -154,3 +152,8 @@ Resources:
                 BlockPublicPolicy: true
                 IgnorePublicAcls: true
                 RestrictPublicBuckets: true
+
+Outputs:
+    API:
+        Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
