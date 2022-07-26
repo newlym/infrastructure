@@ -47,6 +47,7 @@ Resources:
         Properties:
             PackageType: Image
             Policies: AmazonS3FullAccess
+            Timeout: 10
             Environment:
                 Variables:
                     RAW_IMAGE_BUCKET: !Ref RawImageBucket
@@ -70,7 +71,7 @@ Resources:
         Properties:
             DistributionConfig:
                 Origins:
-                    - DomainName: xvm6uotsbj.execute-api.ap-southeast-2.amazonaws.com
+                    - DomainName: !Sub "${APIGatewayAPI}.execute-api.${AWS::Region}.amazonaws.com"
                       Id: ResizeApi
                       OriginPath: /Prod/resize
                       CustomOriginConfig:
@@ -152,8 +153,3 @@ Resources:
                 BlockPublicPolicy: true
                 IgnorePublicAcls: true
                 RestrictPublicBuckets: true
-
-Outputs:
-    API:
-        Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-        Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
