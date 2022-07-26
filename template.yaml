@@ -10,6 +10,12 @@ Parameters:
         Type: String
 
 Resources:
+    APIGatewayAPI:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName: Prod
+            BinaryMediaTypes:
+                - "*/*"
     CheckoutFunction:
         Type: AWS::Serverless::Function
         Properties:
@@ -25,6 +31,7 @@ Resources:
                     Properties:
                         Path: /checkout/{checkoutId}
                         Method: GET
+                        RestApiId: !Ref APIGatewayAPI
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -46,6 +53,7 @@ Resources:
                     Properties:
                         Path: /resize/{file}
                         Method: GET
+                        RestApiId: !Ref APIGatewayAPI
         Metadata:
             DockerTag: nodejs16.x-v1
             DockerContext: resize/
@@ -55,7 +63,7 @@ Resources:
         Properties:
             DistributionConfig:
                 Origins:
-                    - DomainName: siav2s6634.execute-api.ap-southeast-2.amazonaws.com
+                    - DomainName: xvm6uotsbj.execute-api.ap-southeast-2.amazonaws.com
                       Id: ResizeApi
                       OriginPath: /Prod/resize
                       CustomOriginConfig:
