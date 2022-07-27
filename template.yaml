@@ -27,8 +27,7 @@ Resources:
         Type: AWS::Serverless::Api
         Properties:
             StageName: Prod
-            BinaryMediaTypes:
-                - "*/*"
+    # ==== Lambda ====
     CheckoutFunction:
         Type: AWS::Serverless::Function
         Properties:
@@ -59,83 +58,20 @@ Resources:
                 Sourcemap: true
                 EntryPoints:
                     - app.ts
-    # ==== Lambda ====
-    ResizeFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            PackageType: Image
-            Policies: AmazonS3FullAccess
-            Timeout: 10
-            Environment:
-                Variables:
-                    RAW_IMAGE_BUCKET: !Ref RawImageBucket
-                    RESIZED_BUCKET: !Ref ResizedImageBucket
-            Architectures:
-                - x86_64
-            Events:
-                ResizeImageAPI:
-                    Type: Api
-                    Properties:
-                        Path: /resize/{file}
-                        Method: GET
-                        RestApiId: !Ref APIGatewayAPI
-        Metadata:
-            DockerTag: nodejs16.x-v1
-            DockerContext: resize/
-            Dockerfile: Dockerfile
     # ==== CloudFront ====
-    ResizeCloudFront:
+    CMSCloudFront:
         Type: AWS::CloudFront::Distribution
         Properties:
             DistributionConfig:
                 Origins:
-                    - DomainName: !Sub "${APIGatewayAPI}.execute-api.${AWS::Region}.amazonaws.com"
-                      Id: ResizeApi
-                      OriginPath: /Prod/resize
-                      CustomOriginConfig:
-                          HTTPPort: 80
-                          HTTPSPort: 443
-                          OriginProtocolPolicy: https-only
-                          OriginSSLProtocols:
-                              - TLSv1.2
+                    - DomainName: !Sub "${CMSImageBucket}.s3.amazonaws.com"
+                      Id: CMSS3Bucket
+                      S3OriginConfig:
+                          OriginAccessIdentity: origin-access-identity/cloudfront/E127EXAMPLE51Z
                 Enabled: true
                 DefaultCacheBehavior:
-                    TargetOriginId: ResizeApi
+                    TargetOriginId: CMSS3Bucket
                     ViewerProtocolPolicy: allow-all
-                    OriginRequestPolicyId: !Ref ResizeCloudFrontOriginPolicy
-                    CachePolicyId: !Ref ResizeCloudFrontCachePolicy
-    ResizeCloudFrontOriginPolicy:
-        Type: AWS::CloudFront::OriginRequestPolicy
-        Properties:
-            OriginRequestPolicyConfig:
-                Name: ResizeCloudFrontOriginPolicy
-                HeadersConfig:
-                    HeaderBehavior: none
-                CookiesConfig:
-                    CookieBehavior: none
-                QueryStringsConfig:
-                    QueryStringBehavior: whitelist
-                    QueryStrings:
-                        - size
-    ResizeCloudFrontCachePolicy:
-        Type: AWS::CloudFront::CachePolicy
-        Properties:
-            CachePolicyConfig:
-                Name: ResizeCloudFrontCachePolicy
-                MinTTL: 1
-                MaxTTL: 31536000
-                DefaultTTL: 86400
-                ParametersInCacheKeyAndForwardedToOrigin:
-                    HeadersConfig:
-                        HeaderBehavior: none
-                    CookiesConfig:
-                        CookieBehavior: none
-                    EnableAcceptEncodingBrotli: true
-                    EnableAcceptEncodingGzip: true
-                    QueryStringsConfig:
-                        QueryStringBehavior: whitelist
-                        QueryStrings:
-                            - size
     # ==== RDS ====
     CMSDatabase:
         Type: "AWS::RDS::DBInstance"
@@ -149,25 +85,5 @@ Resources:
             MasterUserPassword: !Ref DBPassword
             PubliclyAccessible: true
     # ==== S3 ====
-    RawImageBucket:
+    CMSImageBucket:
         Type: AWS::S3::Bucket
-        Properties:
-            OwnershipControls:
-                Rules:
-                    - ObjectOwnership: BucketOwnerPreferred
-            PublicAccessBlockConfiguration:
-                BlockPublicAcls: true
-                BlockPublicPolicy: true
-                IgnorePublicAcls: true
-                RestrictPublicBuckets: true
-    ResizedImageBucket:
-        Type: AWS::S3::Bucket
-        Properties:
-            OwnershipControls:
-                Rules:
-                    - ObjectOwnership: BucketOwnerPreferred
-            PublicAccessBlockConfiguration:
-                BlockPublicAcls: true
-                BlockPublicPolicy: true
-                IgnorePublicAcls: true
-                RestrictPublicBuckets: true
