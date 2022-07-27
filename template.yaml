@@ -8,6 +8,18 @@ Parameters:
     DBPassword:
         NoEcho: true
         Type: String
+    StripeKey:
+        NoEcho: true
+        Type: String
+    CMSApiUrl:
+        Type: String
+    CMSApiToken:
+        NoEcho: true
+        Type: String
+    CheckoutSuccessUrl:
+        Type: String
+    CheckoutCancelUrl:
+        Type: String
 
 Resources:
     # ==== API Gateway ====
@@ -23,7 +35,13 @@ Resources:
             CodeUri: checkout/
             Handler: app.lambdaHandler
             Runtime: nodejs16.x
-            Policies: AmazonDynamoDBFullAccess
+            Environment:
+                Variables:
+                    STRIPE_KEY: !Ref StripeKey
+                    API_URL: !Ref CMSApiUrl
+                    API_TOKEN: !Ref CMSApiToken
+                    SUCCESS_URL: !Ref CheckoutSuccessUrl
+                    CANCEL_URL: !Ref CheckoutCancelUrl
             Architectures:
                 - x86_64
             Events:

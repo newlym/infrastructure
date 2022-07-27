@@ -3,23 +3,19 @@ import Stripe from "stripe";
 
 import { getBundle } from "./utils";
 
-// const STRIPE_KEY = process.env.STRIPE_KEY as string;
-const STRIPE_KEY = "sk_test_51LOh2yJxHXEJe42jWjM7il59jLG1jTNj7Ah78XjzFy2dtcZoRkBdchHAVUHOYPs0sugZDtzAX0eTDPhz34ELuv2R00QXlCb3am";
-const API_URL = "https://cms-j25hmdlpya-ts.a.run.app";
-const API_TOKEN =
-    "ca2f68700e63a79ad286d04ef99892f0770b6672c7837fb5f4061fc931e13891fc3fa1bb725acaa6361bbf763bb29cfccdd281836aa9d3de012c59b86f2b1e4281563853ccf833752ebdc75306b3d2e4f83c4efc4a665bae604027fd3a3c43d28d63b202f110e90b4056a36609223baba0152f4ff9cb3d619abce7b93bf12e78";
-const SUCCESS_URL = "https://www.newlymphclinic.com.au/checkout-success";
-const CANCEL_URL = "https://www.newlymphclinic.com.au/checkout-failed";
+const STRIPE_KEY = process.env.STRIPE_KEY as string;
+const API_URL = process.env.API_URL as string;
+const API_TOKEN = process.env.API_TOKEN as string;
+const SUCCESS_URL = process.env.SUCCESS_URL as string;
+const CANCEL_URL = process.env.CANCEL_URL as string;
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const bundleId = event.pathParameters?.bundleId;
-
     if (!bundleId) throw Error("Bundle ID required");
 
-    const stripe = new Stripe(STRIPE_KEY, { apiVersion: "2020-08-27" });
     const bundleData = await getBundle(API_URL, API_TOKEN, bundleId);
 
-    // **** I need to add tax for this
+    const stripe = new Stripe(STRIPE_KEY, { apiVersion: "2020-08-27" });
 
     const checkout = await stripe.checkout.sessions.create({
         success_url: SUCCESS_URL,
@@ -36,6 +32,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
                         ? { minimum: { unit: "business_day", value: rate.minimumEstimatedDeliveryTime }, maximum: { unit: "business_day", value: rate.maximumEstimatedDeliveryTime } }
                         : undefined,
                 fixed_amount: { amount: rate.price, currency: "AUD" },
+                tax_behavior: "inclusive",
             },
         })),
         line_items: bundleData.bundleItems.map((item) => ({
@@ -48,8 +45,10 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
                     images: item.product.images,
                 },
                 unit_amount: item.unitPrice,
+                tax_behavior: "inclusive",
             },
         })),
+        automatic_tax: { enabled: true },
     });
     if (!checkout.url) throw Error("Checkout failed");
 
