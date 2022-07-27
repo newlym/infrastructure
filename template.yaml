@@ -72,6 +72,8 @@ Resources:
                 DefaultCacheBehavior:
                     TargetOriginId: CMSS3Bucket
                     ViewerProtocolPolicy: allow-all
+                    ForwardedValues:
+                        QueryString: false
     CMSCloudFrontOAI:
         Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
         Properties:
