@@ -67,11 +67,30 @@ Resources:
                     - DomainName: !Sub "${CMSImageBucket}.s3.amazonaws.com"
                       Id: CMSS3Bucket
                       S3OriginConfig:
-                          OriginAccessIdentity: origin-access-identity/cloudfront/E127EXAMPLE51Z
+                          OriginAccessIdentity: !Join ["", ["origin-access-identity/cloudfront/", !Ref CMSCloudFrontOAI]]
                 Enabled: true
                 DefaultCacheBehavior:
                     TargetOriginId: CMSS3Bucket
                     ViewerProtocolPolicy: allow-all
+    CMSCloudFrontOAI:
+        Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+        Properties:
+            CloudFrontOriginAccessIdentityConfig:
+                Comment: "Restrict S3 access"
+    # ==== S3 ====
+    CMSImageBucket:
+        Type: AWS::S3::Bucket
+    CMSImageBucketPolicy:
+        Type: AWS::S3::BucketPolicy
+        Properties:
+            Bucket: !Ref CMSImageBucket
+            PolicyDocument:
+                Statement:
+                    - Action: s3:GetObject
+                      Effect: Allow
+                      Resource: !Sub "arn:aws:s3:::${CMSImageBucket}/*"
+                      Principal:
+                          CanonicalUser: !GetAtt CMSCloudFrontOAI.S3CanonicalUserId
     # ==== RDS ====
     CMSDatabase:
         Type: "AWS::RDS::DBInstance"
@@ -84,6 +103,3 @@ Resources:
             MasterUsername: !Ref DBUsername
             MasterUserPassword: !Ref DBPassword
             PubliclyAccessible: true
-    # ==== S3 ====
-    CMSImageBucket:
-        Type: AWS::S3::Bucket
