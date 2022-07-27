@@ -30,7 +30,7 @@ Resources:
                 GetCheckoutAPI:
                     Type: Api
                     Properties:
-                        Path: /checkout/{productId}
+                        Path: /checkout/{bundleId}
                         Method: GET
                         RestApiId: !Ref APIGatewayAPI
         Metadata:

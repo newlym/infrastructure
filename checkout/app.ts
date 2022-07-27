@@ -1,44 +1,55 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import Stripe from "stripe";
-import axios from "axios";
 
-const STRIPE_KEY = process.env.STRIPE_KEY as string;
-const API_URL = process.env.API_URL as string;
-const API_TOKEN = process.env.API_TOKEN as string;
-const SUCCESS_URL = process.env.SUCCESS_URL as string;
-const CANCEL_URL = process.env.CANCEL_URL as string;
+import { getBundle } from "./utils";
+
+// const STRIPE_KEY = process.env.STRIPE_KEY as string;
+const STRIPE_KEY = "sk_test_51LOh2yJxHXEJe42jWjM7il59jLG1jTNj7Ah78XjzFy2dtcZoRkBdchHAVUHOYPs0sugZDtzAX0eTDPhz34ELuv2R00QXlCb3am";
+const API_URL = "https://cms-j25hmdlpya-ts.a.run.app";
+const API_TOKEN =
+    "ca2f68700e63a79ad286d04ef99892f0770b6672c7837fb5f4061fc931e13891fc3fa1bb725acaa6361bbf763bb29cfccdd281836aa9d3de012c59b86f2b1e4281563853ccf833752ebdc75306b3d2e4f83c4efc4a665bae604027fd3a3c43d28d63b202f110e90b4056a36609223baba0152f4ff9cb3d619abce7b93bf12e78";
+const SUCCESS_URL = "https://www.newlymphclinic.com.au/checkout-success";
+const CANCEL_URL = "https://www.newlymphclinic.com.au/checkout-failed";
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const productId = event.pathParameters?.productId;
+    const bundleId = event.pathParameters?.bundleId;
 
-    const {
-        data: {
-            data: { attributes },
-        },
-    } = await axios.get(`${API_URL}/api/products/${productId}?populate=%2A`, { headers: { Authorization: `Bearer ${API_TOKEN}` } });
+    if (!bundleId) throw Error("Bundle ID required");
 
     const stripe = new Stripe(STRIPE_KEY, { apiVersion: "2020-08-27" });
+    const bundleData = await getBundle(API_URL, API_TOKEN, bundleId);
 
     // **** I need to add tax for this
 
     const checkout = await stripe.checkout.sessions.create({
         success_url: SUCCESS_URL,
         cancel_url: CANCEL_URL,
-        automatic_tax: { enabled: true },
+        mode: "payment",
         customer_creation: "if_required",
         shipping_address_collection: { allowed_countries: ["AU"] },
-        // shipping_options: attributes.shipping_rates.data.map(({ data: { attributes } }: { data: { attributes: any } }) => ({})),
-        shipping_options: [
-            {
-                shipping_rate_data: {
-                    display_name: "Hello world",
-                    type: "fixed_amount",
-                    delivery_estimate: { minimum: { unit: "business_day", value: 1 }, maximum: { unit: "business_day", value: 10 } },
-                    fixed_amount: { amount: 1500, currency: "AUD" },
-                },
+        shipping_options: bundleData.shippingRates.map((rate) => ({
+            shipping_rate_data: {
+                display_name: rate.name,
+                type: "fixed_amount",
+                delivery_estimate:
+                    rate.minimumEstimatedDeliveryTime && rate.maximumEstimatedDeliveryTime
+                        ? { minimum: { unit: "business_day", value: rate.minimumEstimatedDeliveryTime }, maximum: { unit: "business_day", value: rate.maximumEstimatedDeliveryTime } }
+                        : undefined,
+                fixed_amount: { amount: rate.price, currency: "AUD" },
             },
-        ],
-        line_items: [{ price_data: { currency: "AUD", product_data: { name: "Product 1", description: "This is my product", images: ["this-is-my-image"] }, unit_amount: 1500 } }],
+        })),
+        line_items: bundleData.bundleItems.map((item) => ({
+            quantity: item.quantity,
+            price_data: {
+                currency: "AUD",
+                product_data: {
+                    name: item.product.name,
+                    description: item.product.descriptionShort,
+                    images: item.product.images,
+                },
+                unit_amount: item.unitPrice,
+            },
+        })),
     });
     if (!checkout.url) throw Error("Checkout failed");
 
