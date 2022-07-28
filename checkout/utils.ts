@@ -12,6 +12,10 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
         headers: { Authorization: `Bearer ${apiToken}` },
     });
 
+    attributes.bundleItems.forEach((item: any) => {
+        console.log(item.product.data.attributes);
+    });
+
     const shippingRates = attributes.shipping_rates.data.map((rate: any) => ({
         name: rate.attributes.name,
         minimumEstimatedDeliveryTime: rate.attributes.minimumEstimatedDeliveryTime,
@@ -24,9 +28,9 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
             new Promise(async (resolve) =>
                 resolve({
                     product: {
-                        name: item.product.data.name,
-                        descriptionShort: item.product.data.descriptionShort,
-                        images: item.product.data.images.data.map((img: any) => img.attributes.url),
+                        name: item.product.data.attributes.name,
+                        descriptionShort: item.product.data.attributes.descriptionShort,
+                        images: item.product.data.attributes.images.data.map((img: any) => img.attributes.url),
                     },
                     unitPrice: item.unitPrice,
                     quantity: item.quantity,
