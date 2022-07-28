@@ -62,6 +62,7 @@ Resources:
             CodeUri: stripe-webhook/
             Handler: app.lambdaHandler
             Runtime: nodejs16.x
+            Policies: AmazonSNSFullAccess
             Environment:
                 Variables:
                     STRIPE_KEY: !Ref StripeKey
