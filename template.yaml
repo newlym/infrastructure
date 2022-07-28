@@ -98,6 +98,22 @@ Resources:
         Type: AWS::SQS::Queue
         Properties:
             QueueName: WebhookStripeCheckoutSuccessEmailSQS
+    WebhookStripeCheckoutSuccessEmailSQSPolicy:
+        Type: AWS::SQS::QueuePolicy
+        Properties:
+            Queues:
+                - !Ref WebhookStripeCheckoutSuccessEmailSQS
+            PolicyDocument:
+                Statement:
+                    - Sid: allow-sns-webhook-stripe-checkout-success-email
+                      Effect: Allow
+                      Principal: "*"
+                      Resource: !GetAtt WebhookStripeCheckoutSuccessEmailSQS.Arn
+                      Action:
+                          - SQS:SendMessage
+                      Condition:
+                          ArnEquals:
+                              aws:SourceArn: !Ref WebhookStripeCheckoutSuccessSNS
     # ==== CloudFront ====
     CMSCloudFront:
         Type: AWS::CloudFront::Distribution
