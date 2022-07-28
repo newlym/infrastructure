@@ -1,9 +1,7 @@
 export $(cat .env | xargs)
 
 CONFIG="
-
-$DB_USERAME
-$DB_PASSWORD
+$DB_USERNAME
 $DB_PASSWORD
 $STRIPE_KEY
 $CMS_API_URL
@@ -15,10 +13,9 @@ $CHECKOUT_CANCEL_URL
 y
 
 
-
 "
 
-echo CONFIG
+echo "$CONFIG"
 
-sam build --beta-features
-sam deploy --guided << CONFIG
+# sam build --beta-features
+# sam deploy --guided << CONFIG
