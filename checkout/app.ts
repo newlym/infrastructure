@@ -22,6 +22,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         cancel_url: CANCEL_URL,
         mode: "payment",
         customer_creation: "if_required",
+        allow_promotion_codes: true,
         shipping_address_collection: { allowed_countries: ["AU"] },
         shipping_options: bundleData.shippingRates.map((rate) => ({
             shipping_rate_data: {
