@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import SNS from "aws-sdk/clients/sns";
 
 const STRIPE_KEY = process.env.STRIPE_KEY as string;
-const STRIPE_WEBHOOK_SECRET = process.env.WEBHOOK_SECRET as string;
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET as string;
 const TOPIC_ARN = process.env.TOPIC_ARN as string;
 
 export async function emitMessage(event: Stripe.Event, sns: SNS, topicARN: string) {
@@ -13,7 +13,7 @@ export async function emitMessage(event: Stripe.Event, sns: SNS, topicARN: strin
 }
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const whSignature = event.headers["stripe-signature"];
+    const whSignature = event.headers["Stripe-Signature"];
     if (!whSignature) throw Error("Webhook signature missing");
 
     const sns = new SNS({ apiVersion: "2010-03-31" });
