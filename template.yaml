@@ -3,18 +3,14 @@ Transform: AWS::Serverless-2016-10-31
 
 Parameters:
     DBUsername:
-        NoEcho: true
         Type: String
     DBPassword:
-        NoEcho: true
         Type: String
     StripeKey:
-        NoEcho: true
         Type: String
     CMSApiUrl:
         Type: String
     CMSApiToken:
-        NoEcho: true
         Type: String
     CheckoutSuccessUrl:
         Type: String
