@@ -19,20 +19,15 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
         price: parseInt(rate.attributes.price),
     }));
 
-    const bundleItems = attributes.bundleItems.map(
-        (item: any) =>
-            new Promise(async (resolve) =>
-                resolve({
-                    product: {
-                        name: item.product.data.attributes.name,
-                        descriptionShort: item.product.data.attributes.descriptionShort,
-                        images: item.product.data.attributes.images.data.map((img: any) => img.attributes.url),
-                    },
-                    unitPrice: item.unitPrice,
-                    quantity: item.quantity,
-                })
-            )
-    );
+    const bundleItems = attributes.bundleItems.map((item: any) => ({
+        product: {
+            name: item.product.data.attributes.name,
+            descriptionShort: item.product.data.attributes.descriptionShort,
+            images: item.product.data.attributes.images.data.map((img: any) => img.attributes.url),
+        },
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+    }));
 
     return {
         bundleItems,
