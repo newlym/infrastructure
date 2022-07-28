@@ -4,20 +4,12 @@ import SNS from "aws-sdk/clients/sns";
 
 const STRIPE_KEY = process.env.STRIPE_KEY as string;
 const STRIPE_WEBHOOK_SECRET = process.env.WEBHOOK_SECRET as string;
-const SNS_ARN = process.env.SNS_ARN as string;
+const TOPIC_ARN = process.env.TOPIC_ARN as string;
 
-export async function emitMessage(event: Stripe.Event, sns: SNS, snsARN: string) {
-    const messageParams = { Message: "", TopicArn: snsARN };
+export async function emitMessage(event: Stripe.Event, sns: SNS, topicARN: string) {
+    if (event.type !== "checkout.session.completed") throw Error("Invalid event");
 
-    switch (event.type) {
-        case "checkout.session.completed":
-            messageParams.Message = JSON.stringify(event.data.object);
-            break;
-        default:
-            throw Error("Invalid event");
-    }
-
-    await sns.publish(messageParams).promise();
+    await sns.publish({ Message: JSON.stringify(event.data.object), TopicArn: topicARN }).promise();
 }
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -29,7 +21,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
 
     const stripeEvent = stripe.webhooks.constructEvent(event.body as string, whSignature, STRIPE_WEBHOOK_SECRET);
 
-    await emitMessage(stripeEvent, sns, SNS_ARN);
+    await emitMessage(stripeEvent, sns, TOPIC_ARN);
 
     return {
         statusCode: 200,

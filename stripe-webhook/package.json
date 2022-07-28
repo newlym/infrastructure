@@ -1,5 +1,5 @@
 {
-    "name": "stripe-webhook",
+    "name": "stripe-checkout-success-webhook",
     "version": "1.0.0",
     "dependencies": {
         "aws-sdk": "^2.1183.0",

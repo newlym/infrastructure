@@ -54,6 +54,47 @@ Resources:
                 Sourcemap: true
                 EntryPoints:
                     - app.ts
+    WebhookStripeCheckoutSuccessFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: stripe-webhook/
+            Handler: app.lambdaHandler
+            Runtime: nodejs16.x
+            Environment:
+                Variables:
+                    STRIPE_KEY: !Ref StripeKey
+                    STRIPE_WEBHOOK_SECRET: !Ref StripeWebhookSecret
+                    TOPIC_ARN: !GetAtt WebhookStripeCheckoutSuccessSNS.Arn
+            Architectures:
+                - x86_64
+            Events:
+                GetCheckoutAPI:
+                    Type: Api
+                    Properties:
+                        Path: /webhooks/stripe/checkout-success
+                        Method: POST
+                        RestApiId: !Ref APIGatewayAPI
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Minify: true
+                Target: "es2020"
+                Sourcemap: true
+                EntryPoints:
+                    - app.ts
+    # ==== SNS ====
+    WebhookStripeCheckoutSuccessSNS:
+        Type: AWS::SNS::Topic
+        Properties:
+            TopicName: WebhookStripeSNS
+            Subscription:
+                - Protocol: sqs
+                  Endpoint: !GetAtt WebhookStripeCheckoutSuccessEmailSQS.Arn
+    # ==== SQS ====
+    WebhookStripeCheckoutSuccessEmailSQS:
+        Type: AWS::SQS::Queue
+        Properties:
+            QueueName: WebhookStripeCheckoutSuccessEmailSQS
     # ==== CloudFront ====
     CMSCloudFront:
         Type: AWS::CloudFront::Distribution
