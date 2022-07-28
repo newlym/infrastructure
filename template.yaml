@@ -60,8 +60,7 @@ Resources:
         Properties:
             DistributionConfig:
                 Origins:
-                    # - DomainName: !Sub "${CMSImageBucket}.s3.${AWS::Region}.amazonaws.com"
-                    - DomainName: !Sub "${CMSImageBucket}.s3.amazonaws.com"
+                    - DomainName: !Sub "${CMSImageBucket}.s3.${AWS::Region}.amazonaws.com"
                       Id: CMSS3Bucket
                       S3OriginConfig:
                           OriginAccessIdentity: !Join ["", ["origin-access-identity/cloudfront/", !Ref CMSCloudFrontOAI]]
