@@ -12,10 +12,6 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
         headers: { Authorization: `Bearer ${apiToken}` },
     });
 
-    attributes.bundleItems.forEach((item: any) => {
-        console.log(item.product.data.attributes);
-    });
-
     const shippingRates = attributes.shipping_rates.data.map((rate: any) => ({
         name: rate.attributes.name,
         minimumEstimatedDeliveryTime: rate.attributes.minimumEstimatedDeliveryTime,
@@ -23,7 +19,7 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
         price: parseInt(rate.attributes.price),
     }));
 
-    const bundlesPromise = attributes.bundleItems.map(
+    const bundleItems = attributes.bundleItems.map(
         (item: any) =>
             new Promise(async (resolve) =>
                 resolve({
@@ -37,7 +33,6 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
                 })
             )
     );
-    const bundleItems = await Promise.all(bundlesPromise);
 
     return {
         bundleItems,
@@ -47,17 +42,3 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
         shippingRates: { name: string; minimumEstimatedDeliveryTime: number | null; maximumEstimatedDeliveryTime: number | null; price: number }[];
     };
 }
-
-// async function getProduct(apiUrl: string, apiToken: string, productId: string) {
-//     const {
-//         data: {
-//             data: { attributes },
-//         },
-//     } = await axios.get(`${apiUrl}/api/products/${productId}?populate=%2A`, { headers: { Authorization: `Bearer ${apiToken}` } });
-
-//     return { name: attributes.name, descriptionShort: attributes.descriptionShort, images: attributes.images.data.map((img: any) => img.attributes.url) } as {
-//         name: string;
-//         descriptionShort: string;
-//         images: string[];
-//     };
-// }
