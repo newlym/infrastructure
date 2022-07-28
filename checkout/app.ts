@@ -9,17 +9,12 @@ const API_TOKEN = process.env.API_TOKEN as string;
 const SUCCESS_URL = process.env.SUCCESS_URL as string;
 const CANCEL_URL = process.env.CANCEL_URL as string;
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const bundleId = event.pathParameters?.bundleId;
-    if (!bundleId) throw Error("Bundle ID required");
-
-    const bundleData = await getBundle(API_URL, API_TOKEN, bundleId);
-
-    const stripe = new Stripe(STRIPE_KEY, { apiVersion: "2020-08-27" });
+export async function createCheckout(bundleId: string, stripe: Stripe, apiUrl: string, apiToken: string, successUrl: string, cancelUrl: string) {
+    const bundleData = await getBundle(apiUrl, apiToken, bundleId);
 
     const checkout = await stripe.checkout.sessions.create({
-        success_url: SUCCESS_URL,
-        cancel_url: CANCEL_URL,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
         mode: "payment",
         customer_creation: "if_required",
         allow_promotion_codes: true,
@@ -51,13 +46,24 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         })),
         automatic_tax: { enabled: true },
     });
-    if (!checkout.url) throw Error("Checkout failed");
+
+    return checkout.url;
+}
+
+export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    const bundleId = event.pathParameters?.bundleId;
+    if (!bundleId) throw Error("Bundle ID required");
+
+    const stripe = new Stripe(STRIPE_KEY, { apiVersion: "2020-08-27" });
+
+    const checkoutUrl = await createCheckout(bundleId, stripe, API_URL, API_TOKEN, SUCCESS_URL, CANCEL_URL);
+    if (!checkoutUrl) throw Error("Checkout failed");
 
     return {
         statusCode: 302,
         headers: {
-            Location: checkout.url,
+            Location: checkoutUrl,
         },
-        body: checkout.url,
+        body: checkoutUrl,
     };
 };
