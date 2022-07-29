@@ -89,7 +89,7 @@ Resources:
                 Sourcemap: true
                 EntryPoints:
                     - app.ts
-    OrderNotification:
+    OrderNotificationFunction:
         Type: AWS::Serverless::Function
         Properties:
             CodeUri: order-notification/

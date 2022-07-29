@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { SQSBatchResponse, SQSEvent } from "aws-lambda";
 import Stripe from "stripe";
 import { Client } from "@notionhq/client";
 
@@ -13,15 +13,25 @@ export async function notifyOrder(notion: Client, databaseId: string) {
     });
 }
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    console.log(event);
-
+export const lambdaHandler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
     const notion = new Client({ auth: NOTION_KEY });
 
-    await notifyOrder(notion, NOTION_DATABASE_ID);
+    const batchItemFailures: { itemIdentifier: string }[] = [];
+    await Promise.all(
+        event.Records.map(
+            (record) =>
+                new Promise(async (resolve) => {
+                    try {
+                        console.log(JSON.parse(record.body));
+                        // await notifyOrder(notion, NOTION_DATABASE_ID);
+                    } catch {
+                        batchItemFailures.push({ itemIdentifier: record.messageId });
+                    }
+                })
+        )
+    );
 
     return {
-        statusCode: 200,
-        body: "",
+        batchItemFailures,
     };
 };
