@@ -6,9 +6,11 @@ const NOTION_KEY = process.env.NOTION_KEY as string;
 const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID as string;
 
 export async function notifyOrder(checkoutSession: Stripe.Checkout.Session, notion: Client, databaseId: string) {
+    const titleText = `${checkoutSession.customer_details?.name || ""} ${checkoutSession.amount_total ? "$ " + (checkoutSession.amount_total / 100).toFixed(2) + " AUD" : ""}`;
+
     await notion.pages.create({
         parent: { database_id: databaseId },
-        properties: { Name: [{ text: { content: "LB7" } }], Status: { name: "Backlog" } },
+        properties: { Name: [{ text: { content: titleText } }], Status: { name: "Backlog" } },
         children: [{ paragraph: { rich_text: [{ text: { content: JSON.stringify(checkoutSession) } }] } }],
     });
 }
