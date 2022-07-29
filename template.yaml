@@ -18,6 +18,10 @@ Parameters:
         Type: String
     CheckoutCancelUrl:
         Type: String
+    NotionKey:
+        Type: String
+    NotionOrderDatabaseId:
+        Type: String
 
 Resources:
     # ==== API Gateway ====
@@ -77,6 +81,32 @@ Resources:
                         Path: /webhooks/stripe/checkout-success
                         Method: POST
                         RestApiId: !Ref APIGatewayAPI
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Minify: true
+                Target: "es2020"
+                Sourcemap: true
+                EntryPoints:
+                    - app.ts
+    OrderNotification:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: order-notification/
+            Handler: app.lambdaHandler
+            Runtime: nodejs16.x
+            Environment:
+                Variables:
+                    NOTION_KEY: !Ref NotionKey
+                    NOTION_DATABASE_ID: !Ref NotionOrderDatabaseId
+            Architectures:
+                - x86_64
+            Events:
+                WebhookStripeCheckoutSuccessSQS:
+                    Type: SQS
+                    Properties:
+                        Queue: !GetAtt WebhookStripeCheckoutSuccessEmailSQS.Arn
+                        BatchSize: 1
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
