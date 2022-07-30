@@ -60,6 +60,32 @@ Resources:
                 Sourcemap: true
                 EntryPoints:
                     - app.ts
+    CheckoutSuccessOrderNotificationFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: checkout-success-order-notification/
+            Handler: app.lambdaHandler
+            Runtime: nodejs16.x
+            Environment:
+                Variables:
+                    NOTION_KEY: !Ref NotionKey
+                    NOTION_DATABASE_ID: !Ref NotionOrderDatabaseId
+            Architectures:
+                - x86_64
+            Events:
+                WebhookStripeCheckoutSuccessSQS:
+                    Type: SQS
+                    Properties:
+                        Queue: !GetAtt WebhookStripeCheckoutSuccessNotificationSQS.Arn
+                        BatchSize: 1
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Minify: true
+                Target: "es2020"
+                Sourcemap: true
+                EntryPoints:
+                    - app.ts
     WebhookStripeCheckoutSuccessFunction:
         Type: AWS::Serverless::Function
         Properties:
@@ -81,32 +107,6 @@ Resources:
                         Path: /webhooks/stripe/checkout-success
                         Method: POST
                         RestApiId: !Ref APIGatewayAPI
-        Metadata:
-            BuildMethod: esbuild
-            BuildProperties:
-                Minify: true
-                Target: "es2020"
-                Sourcemap: true
-                EntryPoints:
-                    - app.ts
-    CheckoutSuccessOrderNotificationFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            CodeUri: checkout-success-order-notification/
-            Handler: app.lambdaHandler
-            Runtime: nodejs16.x
-            Environment:
-                Variables:
-                    NOTION_KEY: !Ref NotionKey
-                    NOTION_DATABASE_ID: !Ref NotionOrderDatabaseId
-            Architectures:
-                - x86_64
-            Events:
-                WebhookStripeCheckoutSuccessSQS:
-                    Type: SQS
-                    Properties:
-                        Queue: !GetAtt WebhookStripeCheckoutSuccessNotificationSQS.Arn
-                        BatchSize: 1
         Metadata:
             BuildMethod: esbuild
             BuildProperties:

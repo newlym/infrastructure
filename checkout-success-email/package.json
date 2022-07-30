@@ -1,5 +1,5 @@
 {
-    "name": "order-notification",
+    "name": "checkout-success-email",
     "version": "1.0.0",
     "dependencies": {
         "stripe": "^9.14.0",
