@@ -2,8 +2,9 @@
     "name": "checkout-success-order-notification",
     "version": "1.0.0",
     "dependencies": {
-        "stripe": "^9.14.0",
-        "@notionhq/client": "^1.0.1"
+        "@sendgrid/client": "^7.7.0",
+        "@sendgrid/mail": "^7.7.0",
+        "stripe": "^9.14.0"
     },
     "scripts": {
         "compile": "tsc"

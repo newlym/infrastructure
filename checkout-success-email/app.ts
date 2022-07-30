@@ -3,42 +3,34 @@ import Stripe from "stripe";
 import sgMail from "@sendgrid/mail";
 import sgClient from "@sendgrid/client";
 
-// const MAILCHIMP_REGION = process.env.MAILCHIMP_REGION as string;
-// const MAILCHIMP_API_KEY = process.env.MAILCHIMP_API_KEY as string;
-// const MAILCHIMP_LIST_ID = process.env.MAILCHIMP_LIST_ID as string;
-// const MANDRILL_TEMPLATE_ID = process.env.MANDRILL_TEMPLATE_ID as string;
-// const MANDRILL_API_KEY = process.env.MANDRILL_API_KEY as string;
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY as string;
+const SENDGRID_LIST_ID = process.env.SENDGRID_LIST_ID as string;
+const SENDGRID_TEMPLATE_ID = process.env.SENDGRID_TEMPLATE_ID as string;
 
 sgMail.setApiKey(SENDGRID_API_KEY);
 sgClient.setApiKey(SENDGRID_API_KEY);
 
 export async function subscribeEmail(email: string, listId: string) {
-    try {
-        await sgClient.request({
-            url: `/v3/marketing/contacts`,
-            method: "PUT",
-            body: {
-                contacts: [
-                    {
-                        email,
-                        custom_fields: {
-                            w1_T: "yes", // paying
-                            w2_D: new Date(), // recent_purchase
-                            w3_T: "no", // active_cart
-                        },
+    await sgClient.request({
+        url: `/v3/marketing/contacts`,
+        method: "PUT",
+        body: {
+            contacts: [
+                {
+                    email,
+                    custom_fields: {
+                        w1_T: "yes", // paying
+                        w2_D: new Date(), // recent_purchase
+                        w3_T: "no", // active_cart
                     },
-                ],
-                list_ids: [listId],
-            },
-        });
-    } catch (e: any) {
-        console.log(e.response.body.errors);
-        console.log();
-        console.log(e);
-    }
+                },
+            ],
+            list_ids: [listId],
+        },
+    });
 }
 
-export async function sendThankYouEmail(email: string, templateId: string) {
+export async function sendEmail(email: string, templateId: string) {
     await sgMail.send({
         to: email,
         from: "notifications@newlym.com",
@@ -47,27 +39,17 @@ export async function sendThankYouEmail(email: string, templateId: string) {
 }
 
 export const lambdaHandler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
-    const batchItemFailures: { itemIdentifier: string }[] = [];
-    // await Promise.all(
-    //     event.Records.map(
-    //         (record) =>
-    //             new Promise(async (resolve) => {
-    //                 try {
-    //                     // const checkoutSession: Stripe.Checkout.Session = JSON.parse(JSON.parse(record.body).Message);
-    //                     await updateEmail({} as any, MAILCHIMP_REGION, MAILCHIMP_LIST_ID, MAILCHIMP_API_KEY);
-    //                 } catch {
-    //                     batchItemFailures.push({ itemIdentifier: record.messageId });
-    //                 }
-    //             })
-    //     )
-    // );
+    for (const record of event.Records) {
+        const checkoutSession: Stripe.Checkout.Session = JSON.parse(JSON.parse(record.body).Message);
 
-    await subscribeEmail("bengrantalbertosborn@gmail.com", SENDGRID_LIST_ID);
-    // await sendThankYouEmail("bengrantalbertosborn@gmail.com", SENDGRID_TEMPLATE_ID);
+        const email = checkoutSession.customer_details?.email;
+        if (!email) continue;
+
+        await subscribeEmail(email, SENDGRID_LIST_ID);
+        await sendEmail(email, SENDGRID_TEMPLATE_ID);
+    }
 
     return {
-        batchItemFailures,
+        batchItemFailures: [],
     };
 };
-
-lambdaHandler({} as any);

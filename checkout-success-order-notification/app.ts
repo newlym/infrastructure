@@ -1,39 +1,42 @@
 import { SQSBatchResponse, SQSEvent } from "aws-lambda";
 import Stripe from "stripe";
-import { Client } from "@notionhq/client";
+import sgMail from "@sendgrid/mail";
+import sgClient from "@sendgrid/client";
 
-const NOTION_KEY = process.env.NOTION_KEY as string;
-const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID as string;
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY as string;
+const SENDGRID_LIST_ID = process.env.SENDGRID_LIST_ID as string;
 
-export async function notifyOrder(checkoutSession: Stripe.Checkout.Session, notion: Client, databaseId: string) {
+sgMail.setApiKey(SENDGRID_API_KEY);
+sgClient.setApiKey(SENDGRID_API_KEY);
+
+export async function sendEmail(checkoutSession: Stripe.Checkout.Session) {
     const titleText = `${checkoutSession.customer_details?.name || ""} ${checkoutSession.amount_total ? "$" + (checkoutSession.amount_total / 100).toFixed(2) + " AUD" : ""}`;
 
-    await notion.pages.create({
-        parent: { database_id: databaseId },
-        properties: { Name: [{ text: { content: titleText } }], Status: { name: "Backlog" } },
-        children: [{ paragraph: { rich_text: [{ text: { content: JSON.stringify(checkoutSession) } }] } }],
+    const contacts = await sgClient.request({
+        url: `/v3/marketing/contacts/search`,
+        method: "POST",
+        body: {
+            query: "email LIKE `%`",
+        },
     });
+
+    console.log(contacts);
+
+    // await sgMail.send({
+    //     to: email,
+    //     from: "orders@newlym.com",
+    //     subject: titleText,
+    //     text: JSON.stringify(checkoutSession),
+    // });
 }
 
 export const lambdaHandler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
-    const notion = new Client({ auth: NOTION_KEY });
-
-    const batchItemFailures: { itemIdentifier: string }[] = [];
-    await Promise.all(
-        event.Records.map(
-            (record) =>
-                new Promise(async (resolve) => {
-                    try {
-                        const checkoutSession: Stripe.Checkout.Session = JSON.parse(JSON.parse(record.body).Message);
-                        await notifyOrder(checkoutSession, notion, NOTION_DATABASE_ID);
-                    } catch {
-                        batchItemFailures.push({ itemIdentifier: record.messageId });
-                    }
-                })
-        )
-    );
+    for (const record of event.Records) {
+        const checkoutSession: Stripe.Checkout.Session = JSON.parse(JSON.parse(record.body).Message);
+        await sendEmail(checkoutSession);
+    }
 
     return {
-        batchItemFailures,
+        batchItemFailures: [],
     };
 };
