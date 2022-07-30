@@ -26,6 +26,10 @@ Parameters:
         Type: String
     SendGridOrderAdminList:
         Type: String
+    NotionApiKey:
+        Type: String
+    NotionDatabaseId:
+        Type: String
 
 Resources:
     # ==== API Gateway ====
@@ -74,6 +78,8 @@ Resources:
                 Variables:
                     SENDGRID_API_KEY: !Ref SendGridApiKey
                     SENDGRID_LIST_ID: !Ref SendGridOrderAdminList
+                    NOTION_KEY: !Ref NotionApiKey
+                    NOTION_DATABASE_ID: !Ref NotionDatabaseId
             Architectures:
                 - x86_64
             Events:
