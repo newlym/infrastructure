@@ -32,7 +32,8 @@ export async function createCheckout(bundleId: string, stripe: Stripe, apiUrl: s
             },
         })),
         line_items: bundleData.bundleItems.map((item) => ({
-            quantity: item.quantity,
+            quantity: item.maxQuantity,
+            adjustable_quantity: item.minQuantity !== item.maxQuantity ? { enabled: true, minimum: item.minQuantity, maximum: item.maxQuantity } : { enabled: false },
             price_data: {
                 currency: "AUD",
                 product_data: {

@@ -26,14 +26,15 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
             images: item.product.data.attributes.images.data.map((img: any) => img.attributes.url),
         },
         unitPrice: item.unitPrice,
-        quantity: item.quantity,
+        minQuantity: item.minQuantity,
+        maxQuantity: item.maxQuantity,
     }));
 
     return {
         bundleItems,
         shippingRates,
     } as {
-        bundleItems: { product: { name: string; descriptionShort: string; images: string[] }; unitPrice: number; quantity: number }[];
+        bundleItems: { product: { name: string; descriptionShort: string; images: string[] }; unitPrice: number; minQuantity: number; maxQuantity: number }[];
         shippingRates: { name: string; minimumEstimatedDeliveryTime: number | null; maximumEstimatedDeliveryTime: number | null; price: number }[];
     };
 }
