@@ -63,7 +63,7 @@ Resources:
     WebhookStripeCheckoutSuccessFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: stripe-webhook/
+            CodeUri: webhook-stripe-checkout-success/
             Handler: app.lambdaHandler
             Runtime: nodejs16.x
             Policies: AmazonSNSFullAccess
@@ -89,10 +89,10 @@ Resources:
                 Sourcemap: true
                 EntryPoints:
                     - app.ts
-    OrderNotificationFunction:
+    CheckoutSuccessOrderNotificationFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: order-notification/
+            CodeUri: checkout-success-order-notification/
             Handler: app.lambdaHandler
             Runtime: nodejs16.x
             Environment:

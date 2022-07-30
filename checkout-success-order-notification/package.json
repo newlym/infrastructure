@@ -1,9 +1,9 @@
 {
-    "name": "stripe-checkout-success-webhook",
+    "name": "checkout-success-order-notification",
     "version": "1.0.0",
     "dependencies": {
-        "aws-sdk": "^2.1183.0",
-        "stripe": "^9.14.0"
+        "stripe": "^9.14.0",
+        "@notionhq/client": "^1.0.1"
     },
     "scripts": {
         "compile": "tsc"
