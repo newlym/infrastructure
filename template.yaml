@@ -73,7 +73,7 @@ Resources:
             Architectures:
                 - x86_64
             Events:
-                WebhookStripeCheckoutSuccessSQS:
+                CheckoutSuccessSQS:
                     Type: SQS
                     Properties:
                         Queue: !GetAtt WebhookStripeCheckoutSuccessNotificationSQS.Arn
@@ -119,10 +119,12 @@ Resources:
     WebhookStripeCheckoutSuccessSNS:
         Type: AWS::SNS::Topic
         Properties:
-            TopicName: WebhookStripeSNS
+            TopicName: WebhookStripeCheckoutSNS
             Subscription:
                 - Protocol: sqs
                   Endpoint: !GetAtt WebhookStripeCheckoutSuccessEmailSQS.Arn
+                - Protocol: sqs
+                  Endpoint: !GetAtt WebhookStripeCheckoutSuccessNotificationSQS.Arn
     # ==== SQS ====
     WebhookStripeCheckoutSuccessEmailSQS:
         Type: AWS::SQS::Queue
@@ -148,7 +150,7 @@ Resources:
         Type: AWS::SQS::Queue
         Properties:
             QueueName: WebhookStripeCheckoutSuccessNotificationSQS
-    WebhookStripeCheckoutSuccessEmailSQSPolicy:
+    WebhookStripeCheckoutSuccessNotificationSQSPolicy:
         Type: AWS::SQS::QueuePolicy
         Properties:
             Queues:
