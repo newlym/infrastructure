@@ -18,9 +18,13 @@ Parameters:
         Type: String
     CheckoutCancelUrl:
         Type: String
-    NotionKey:
+    SendGridApiKey:
         Type: String
-    NotionOrderDatabaseId:
+    SendGridMainList:
+        Type: String
+    SendGridPurchaseThankYouTemplateId:
+        Type: String
+    SendGridOrderAdminList:
         Type: String
 
 Resources:
@@ -68,8 +72,8 @@ Resources:
             Runtime: nodejs16.x
             Environment:
                 Variables:
-                    NOTION_KEY: !Ref NotionKey
-                    NOTION_DATABASE_ID: !Ref NotionOrderDatabaseId
+                    SENDGRID_API_KEY: !Ref SendGridApiKey
+                    SENDGRID_LIST_ID: !Ref SendGridOrderAdminList
             Architectures:
                 - x86_64
             Events:
@@ -77,6 +81,33 @@ Resources:
                     Type: SQS
                     Properties:
                         Queue: !GetAtt WebhookStripeCheckoutSuccessNotificationSQS.Arn
+                        BatchSize: 1
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Minify: true
+                Target: "es2020"
+                Sourcemap: true
+                EntryPoints:
+                    - app.ts
+    CheckoutSuccessEmailFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: checkout-success-email/
+            Handler: app.lambdaHandler
+            Runtime: nodejs16.x
+            Environment:
+                Variables:
+                    SENDGRID_API_KEY: !Ref SendGridApiKey
+                    SENDGRID_LIST_ID: !Ref SendGridMainList
+                    SENDGRID_TEMPLATE_ID: !Ref SendGridPurchaseThankYouTemplateId
+            Architectures:
+                - x86_64
+            Events:
+                CheckoutSuccessSQS:
+                    Type: SQS
+                    Properties:
+                        Queue: !GetAtt WebhookStripeCheckoutSuccessEmailSQS.Arn
                         BatchSize: 1
         Metadata:
             BuildMethod: esbuild
