@@ -105,7 +105,7 @@ Resources:
                 WebhookStripeCheckoutSuccessSQS:
                     Type: SQS
                     Properties:
-                        Queue: !GetAtt WebhookStripeCheckoutSuccessEmailSQS.Arn
+                        Queue: !GetAtt WebhookStripeCheckoutSuccessNotificationSQS.Arn
                         BatchSize: 1
         Metadata:
             BuildMethod: esbuild
@@ -139,6 +139,26 @@ Resources:
                       Effect: Allow
                       Principal: "*"
                       Resource: !GetAtt WebhookStripeCheckoutSuccessEmailSQS.Arn
+                      Action:
+                          - SQS:SendMessage
+                      Condition:
+                          ArnEquals:
+                              aws:SourceArn: !Ref WebhookStripeCheckoutSuccessSNS
+    WebhookStripeCheckoutSuccessNotificationSQS:
+        Type: AWS::SQS::Queue
+        Properties:
+            QueueName: WebhookStripeCheckoutSuccessNotificationSQS
+    WebhookStripeCheckoutSuccessEmailSQSPolicy:
+        Type: AWS::SQS::QueuePolicy
+        Properties:
+            Queues:
+                - !Ref WebhookStripeCheckoutSuccessNotificationSQS
+            PolicyDocument:
+                Statement:
+                    - Sid: allow-sns-webhook-stripe-checkout-success-notification
+                      Effect: Allow
+                      Principal: "*"
+                      Resource: !GetAtt WebhookStripeCheckoutSuccessNotificationSQS.Arn
                       Action:
                           - SQS:SendMessage
                       Condition:
