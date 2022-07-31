@@ -28,13 +28,14 @@ export async function getBundle(apiUrl: string, apiToken: string, bundleId: stri
         unitPrice: item.unitPrice,
         minQuantity: item.minQuantity,
         maxQuantity: item.maxQuantity,
+        defaultQuantity: item.defaultQuantity,
     }));
 
     return {
         bundleItems,
         shippingRates,
     } as {
-        bundleItems: { product: { name: string; descriptionShort: string; images: string[] }; unitPrice: number; minQuantity: number; maxQuantity: number }[];
+        bundleItems: { product: { name: string; descriptionShort: string; images: string[] }; unitPrice: number; minQuantity: number; maxQuantity: number; defaultQuantity: number }[];
         shippingRates: { name: string; minimumEstimatedDeliveryTime: number | null; maximumEstimatedDeliveryTime: number | null; price: number }[];
     };
 }
