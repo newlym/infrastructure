@@ -18,11 +18,7 @@ export async function subscribeEmail(email: string, listId: string) {
             contacts: [
                 {
                     email,
-                    custom_fields: {
-                        w1_T: "yes", // paying
-                        w2_D: new Date(), // recent_purchase
-                        w3_T: "no", // active_cart
-                    },
+                    custom_fields: {},
                 },
             ],
             list_ids: [listId],
